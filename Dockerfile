@@ -1,9 +1,18 @@
 # Docker file
 
-FROM    mongodb/mongodb
+FROM    ubuntu:latest
 
 # Git
 RUN apt-get install -y git
+
+# MongoDB
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+RUN echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/10gen.list
+RUN dpkg-divert --local --rename --add /sbin/initctl
+RUN ln -s /bin/true /sbin/initctl
+RUN apt-get update
+RUN apt-get install mongodb-10gen
+RUN mkdir -p /data/db
 
 # NodeJS
 RUN apt-get update --fix-missing && apt-get upgrade -y
@@ -16,4 +25,5 @@ RUN git clone https://github.com/seismolabs/seismo-server.git /home/seismo
 RUN cd /home/seismo; npm install
 ENV PORT 8080
 EXPOSE 8080
-CMD ["node", "/home/seismo/app.js"]
+
+ENTRYPOINT ["node", "/home/seismo/app.js"]
